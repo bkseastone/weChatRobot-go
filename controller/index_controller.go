@@ -2,11 +2,12 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"weChatRobot-go/models"
 	"weChatRobot-go/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func IndexHandler(c *gin.Context) {
@@ -24,8 +25,10 @@ func (mc *MessageController) ReceiveMessage(c *gin.Context) {
 		timestamp := c.Query("timestamp")
 		nonce := c.Query("nonce")
 		if mc.WechatService.CheckSignature(signature, timestamp, nonce) {
+			fmt.Println("chenggong")
 			_, _ = fmt.Fprint(c.Writer, c.Query("echostr"))
 		} else {
+			fmt.Println("shibai")
 			_, _ = fmt.Fprint(c.Writer, "你是谁？你想干嘛？")
 		}
 	} else {
@@ -38,9 +41,8 @@ func (mc *MessageController) ReceiveMessage(c *gin.Context) {
 		}
 
 		log.Printf("收到消息 %v\n", reqMessage)
-		respXmlStr := service.GetResponseMessage(reqMessage)
-		log.Printf("响应消息 %v\n", respXmlStr)
-
+		respXmlStr := service.GetGPT3ResponseMessage(reqMessage)
+		log.Printf("响应消息 ||%v||\n", respXmlStr)
 		_, _ = fmt.Fprint(c.Writer, respXmlStr)
 	}
 }
