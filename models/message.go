@@ -20,12 +20,25 @@ type ReqMessage struct {
 	MsgId        int64
 }
 
-// RespMessage 响应消息基础结构体
+// 生成带CDATA标识的xml值
+type CDATA struct {
+	Text string `xml:",cdata"`
+}
+
+// RespMessage 响应消息基础结构体, 示例:
+//
+//	<xml>
+//		<ToUserName><![CDATA[toUser]]></ToUserName>
+//		<FromUserName><![CDATA[fromUser]]></FromUserName>
+//		<CreateTime>12345678</CreateTime>
+//		<MsgType><![CDATA[text]]></MsgType>
+//		<Content><![CDATA[你好]]></Content>
+//	</xml>
 type RespMessage struct {
-	ToUserName   string
-	FromUserName string
+	ToUserName   CDATA
+	FromUserName CDATA
 	CreateTime   int64
-	MsgType      string
+	MsgType      CDATA
 	// 若不标记XMLName, 则解析后的xml名为该结构体的名称
 	XMLName xml.Name `xml:"xml"`
 }
@@ -33,7 +46,7 @@ type RespMessage struct {
 // RespTextMessage 文本响应消息结构体
 type RespTextMessage struct {
 	RespMessage
-	Content string
+	Content CDATA
 }
 
 // RespNewsMessage 图文响应消息结构体

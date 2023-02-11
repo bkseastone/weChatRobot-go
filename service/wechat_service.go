@@ -34,6 +34,61 @@ func (ws *WechatService) CheckSignature(signature, timestamp, nonce string) bool
 	return signature == sha1Value
 }
 
+// GPT3
+func GetGPT3ResponseMessage(reqMessage models.ReqMessage) string {
+	var respMessage interface{}
+	if reqMessage.MsgType == models.MsgTypeText {
+		// resp, err := http.Get("http://localhost:8081/weChat/receiveMessage?query=" + reqMessage.Content)
+		// if err != nil {
+		// 	log.Fatalf("GET请求失败: %s", err)
+		// }
+		// defer resp.Body.Close()
+
+		// body, err := ioutil.ReadAll(resp.Body)
+		// if err != nil {
+		// 	log.Fatalf("读取响应失败: %s", err)
+		// }
+		// respMessage = BuildRespTextMessage(reqMessage.ToUserName, reqMessage.FromUserName, string(body))
+		respMessage = BuildRespTextMessage(reqMessage.ToUserName, reqMessage.FromUserName, reqMessage.Content)
+	} else {
+		respMessage = BuildRespTextMessage(reqMessage.ToUserName, reqMessage.FromUserName, "我只对文字感兴趣[悠闲]")
+	}
+
+	if respMessage == nil {
+		return ""
+	} else {
+		respXmlStr, err := xml.Marshal(&respMessage)
+		if err != nil {
+			log.Printf("XML编码出错: %v\n", err)
+			return ""
+		}
+
+		return string(respXmlStr)
+	}
+}
+
+// 消息回响
+func GetEchoResponseMessage(reqMessage models.ReqMessage) string {
+	var respMessage interface{}
+	if reqMessage.MsgType == models.MsgTypeText {
+		respMessage = BuildRespTextMessage(reqMessage.ToUserName, reqMessage.FromUserName, reqMessage.Content)
+	} else {
+		respMessage = BuildRespTextMessage(reqMessage.ToUserName, reqMessage.FromUserName, "我只对文字感兴趣[悠闲]")
+	}
+
+	if respMessage == nil {
+		return ""
+	} else {
+		respXmlStr, err := xml.Marshal(&respMessage)
+		if err != nil {
+			log.Printf("XML编码出错: %v\n", err)
+			return ""
+		}
+
+		return string(respXmlStr)
+	}
+}
+
 func GetResponseMessage(reqMessage models.ReqMessage) string {
 	var respMessage interface{}
 	if reqMessage.MsgType == models.MsgTypeEvent {
@@ -109,12 +164,12 @@ func GetRespMessageByKeyword(fromUserName, toUserName, keyword string) interface
 
 func BuildRespTextMessage(fromUserName, toUserName, content string) models.RespTextMessage {
 	respMessage := models.RespTextMessage{
-		Content: content,
+		Content: models.CDATA{Text: content},
 	}
-	respMessage.FromUserName = fromUserName
-	respMessage.ToUserName = toUserName
+	respMessage.FromUserName = models.CDATA{Text: fromUserName}
+	respMessage.ToUserName = models.CDATA{Text: toUserName}
 	respMessage.CreateTime = time.Now().Unix()
-	respMessage.MsgType = "text"
+	respMessage.MsgType = models.CDATA{Text: "text"}
 	return respMessage
 }
 
@@ -123,9 +178,9 @@ func BuildRespNewsMessage(fromUserName, toUserName string, articles []models.Art
 		ArticleCount: len(articles),
 		Articles:     articles,
 	}
-	respMessage.FromUserName = fromUserName
-	respMessage.ToUserName = toUserName
+	respMessage.FromUserName = models.CDATA{Text: fromUserName}
+	respMessage.ToUserName = models.CDATA{Text: toUserName}
 	respMessage.CreateTime = time.Now().Unix()
-	respMessage.MsgType = "news"
+	respMessage.MsgType = models.CDATA{Text: "news"}
 	return respMessage
 }

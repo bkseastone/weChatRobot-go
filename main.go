@@ -4,7 +4,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,7 +11,9 @@ import (
 	"weChatRobot-go/config"
 	"weChatRobot-go/controller"
 	"weChatRobot-go/models"
-	"weChatRobot-go/service"
+
+	"github.com/gin-gonic/gin"
+	// "weChatRobot-go/service"
 )
 
 //go:embed static/images templates
@@ -37,9 +38,9 @@ func runApp(configFile string) error {
 		return err
 	}
 
-	service.TulingConfig = configSettings.TulingConfig
+	// service.TulingConfig = configSettings.TulingConfig
 
-	go service.InitKeywordMap(keywordBytes)
+	// go service.InitKeywordMap(keywordBytes)
 
 	// 注册路由
 	router := setupRouter(configSettings)
